@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microblogging App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #00796b;
+            color: white;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #00796b;
+            outline: none;
+        }
+
+        .form-button {
+            padding: 10px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 5px 0; /* Added spacing */
+            transition: background-color 0.3s;
+        }
+
+        .form-button:hover {
+            background-color: #004d40;
+        }
+
+        .post-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            resize: none;
+        }
+
+        .post-button {
+            padding: 10px 20px;
+            background-color: #ff7043;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .post-button:hover {
+            background-color: #ff5722;
+        }
+
+        .posts {
+            margin-top: 20px;
+        }
+
+        .post {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .time {
+            font-size: 0.8em;
+            color: gray;
+        }
+
+        .button-group {
+            margin: 10px 0;
+        }
+
+        .reaction {
+            cursor: pointer;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .comment-input {
+            width: calc(100% - 80px);
+            margin-top: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .comments {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .emoji {
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+
+        .emoji-count {
+            margin-left: 5px;
+            font-size: 0.9em;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Microblogging App</h1>
+</header>
+
+<div class="container" id="auth">
+    <div class="login">
+        <h2>Login</h2>
+        <input type="text" id="loginUsername" class="form-input" placeholder="Username" required>
+        <input type="password" id="loginPassword" class="form-input" placeholder="Password" required>
+        <button id="loginButton" class="form-button">Login</button>
+        <button id="showRegister" class="form-button">Register</button>
+    </div>
+
+    <div class="register hidden">
+        <h2>Register</h2>
+        <input type="text" id="registerUsername" class="form-input" placeholder="Username" required>
+        <input type="password" id="registerPassword" class="form-input" placeholder="Password" required>
+        <button id="registerButton" class="form-button">Register</button>
+        <button id="showLogin" class="form-button">Login</button>
+    </div>
+</div>
+
+<div class="container hidden" id="postContainer">
+    <textarea id="postInput" class="post-input" placeholder="What's on your mind?"></textarea>
+    <button id="postButton" class="post-button">Post</button>
+    <div id="posts" class="posts"></div>
+</div>
+
+<script>
+    const users = {};
+    let currentUser = null;
+
+    document.getElementById('showRegister').addEventListener('click', function() {
+        document.querySelector('.login').classList.add('hidden');
+        document.querySelector('.register').classList.remove('hidden');
+    });
+
+    document.getElementById('showLogin').addEventListener('click', function() {
+        document.querySelector('.register').classList.add('hidden');
+        document.querySelector('.login').classList.remove('hidden');
+    });
+
+    document.getElementById('loginButton').addEventListener('click', function() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        if (users[username] && users[username].password === password) {
+            currentUser = username;
+            alert(`Welcome back, ${currentUser}!`);
+            document.getElementById('auth').classList.add('hidden');
+            document.getElementById('postContainer').classList.remove('hidden');
+        } else {
+            alert('Invalid username or password.');
+        }
+    });
+
+    document.getElementById('registerButton').addEventListener('click', function() {
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+
+        if (!users[username]) {
+            users[username] = { password };
+            alert('Registration successful! You can now log in.');
+            document.querySelector('.register').classList.add('hidden');
+            document.querySelector('.login').classList.remove('hidden');
+        } else {
+            alert('Username already exists. Please choose another.');
+        }
+    });
+
+    // Load posts from localStorage on page load
+    window.onload = function () {
+        const savedPosts = JSON.parse(localStorage.getItem('posts')) || [];
+        savedPosts.forEach(post => {
+            addPostToDOM(post.message, post.time);
+        });
+    };
+
+    document.getElementById('postButton').addEventListener('click', function () {
+        var input = document.getElementById('postInput');
+        var message = input.value.trim();
+        if (message) {
+            var now = new Date();
+            var time = now.toLocaleString();
+
+            // Save post to localStorage
+            savePostToLocalStorage(message, time);
+            addPostToDOM(message, time);
+            input.value = '';
+        }
+    });
+
+    function savePostToLocalStorage(message, time) {
+        const savedPosts = JSON.parse(localStorage.getItem('posts')) || [];
+        savedPosts.push({ message, time });
+        localStorage.setItem('posts', JSON.stringify(savedPosts));
+    }
+
+    function addPostToDOM(message, time) {
+        var postDiv = document.createElement('div');
+        postDiv.className = 'post';
+        postDiv.innerHTML = `
+            <div>${message}</div>
+            <div class="time">${time}</div>
+            <div class="button-group">
+                <span class="reaction emoji" onclick="addReaction(this, '😀')">😀 <span class="emoji-count">0</span></span>
+                <span class="reaction emoji" onclick="addReaction(this, '😍')">😍 <span class="emoji-count">0</span></span>
+                <span class="reaction emoji" onclick="addReaction(this, '😢')">😢 <span class="emoji-count">0</span></span>
+                <span class="reaction emoji" onclick="addReaction(this, '😡')">😡 <span class="emoji-count">0</span></span>
+                <span class="reaction emoji" onclick="addReaction(this, '🎉')">🎉 <span class="emoji-count">0</span></span>
+            </div>
+            <input type="text" class="comment-input" placeholder="Add a comment...">
+            <button onclick="addComment(this)">Comment</button>
+            <div class="comments"></div>
+        `;
+        document.getElementById('posts').appendChild(postDiv);
+    }
+
+    function addReaction(button, emoji) {
+        const countSpan = button.querySelector('.emoji-count');
+        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+    }
+
+    function addComment(button) {
+        var commentInput = button.previousElementSibling;
+        var commentText = commentInput.value.trim();
+        if (commentText) {
+            var commentsDiv = button.nextElementSibling;
+            var commentDiv = document.createElement('div');
+            commentDiv.textContent = commentText;
+            commentsDiv.appendChild(commentDiv);
+            commentInput.value = '';
+        }
+    }
+</script>
+</body>
+</html>
